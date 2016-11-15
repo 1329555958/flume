@@ -113,8 +113,7 @@ public class KafkaSource extends AbstractSource
 
                     // Add headers to event (topic, timestamp, and key)
                     headers = new HashMap<String, String>();
-//          headers.put(KafkaSourceConstants.TIMESTAMP,
-//                  String.valueOf(System.currentTimeMillis()));
+
                     headers.put(KafkaSourceConstants.TOPIC, topic);
                     if (kafkaKey != null) {
                         headers.put(KafkaSourceConstants.KEY, new String(kafkaKey));
@@ -134,10 +133,15 @@ public class KafkaSource extends AbstractSource
 
                             String[] headerArray = headerStr.split(" ");
                             for (int i = 0; i < headerArray.length; i++) {
+                                if (headerArray[i].isEmpty()) {
+                                    continue;
+                                }
                                 String[] keyValue = headerArray[i].split("=");
+                                if (keyValue.length == 1) {
+                                    keyValue = new String[]{keyValue[0], ""};
+                                }
                                 //时间头处理
                                 if ("logdate".equals(keyValue[0])) {
-                                    System.out.println("length=" + keyValue[1].length() + "=" + keyValue[1] + "=");
                                     try {
                                         //1475903770076
                                         if (keyValue[1].length() == 13) {
@@ -149,9 +153,6 @@ public class KafkaSource extends AbstractSource
                                             Date date = formatterSSS.parse(keyValue[1]);
                                             headers.put("timestamp", "" + date.getTime());
                                         } else {
-                                            System.out.println("headerStr=" + headerStr);
-                                            System.out.println("msg=" + msg);
-                                            System.out.println("length=" + keyValue[1].length() + "=" + keyValue[1] + "=");
                                             headers.put("timestamp", "" + new Date().getTime());
                                         }
                                     } catch (Exception e) {
@@ -191,7 +192,6 @@ public class KafkaSource extends AbstractSource
                             }
                         }
                     }
-
                     event = EventBuilder.withBody(kafkaMessage, headers);
                     eventList.add(event);
                 }
@@ -330,6 +330,25 @@ public class KafkaSource extends AbstractSource
         } catch (ConsumerTimeoutException e) {
             return false;
         }
+    }
+
+    public static void main(String[] args) {
+        Map<String, String> headers = new HashMap<>();
+        String headerStr = "timestamp=1479194550749 appName=vfinance className=null     methodName=null chainId=CID97fdfddec5894984ad7cf4c6125e6a0f id=2.1 traceId=TIDc6486628868343b282edfe4f4f70ee99 extId=TID3ecba3f5dd7a4ed9ae5c55d23a83c392 params= result=null cost=0";
+        String[] headerArray = headerStr.split(" ");
+        for (int i = 0; i < headerArray.length; i++) {
+            if (headerArray[i].isEmpty()) {
+                continue;
+            }
+            String[] keyValue = headerArray[i].split("=");
+            if (keyValue.length == 1) {
+                keyValue = new String[]{keyValue[0], ""};
+            }
+
+            headers.put(keyValue[0], keyValue[1]);
+
+        }
+        System.out.println(headers);
     }
 
 }
