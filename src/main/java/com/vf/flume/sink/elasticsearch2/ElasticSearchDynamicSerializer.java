@@ -34,49 +34,51 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
  * Basic serializer that serializes the event body and header fields into
  * individual fields
  * </p>
- *
+ * <p>
  * A best effort will be used to determine the content-type, if it cannot be
  * determined fields will be indexed as Strings
  */
 public class ElasticSearchDynamicSerializer implements ElasticSearchEventSerializer {
 
-	@Override
-	public void configure(Context context) {
-		// NO-OP...
-	}
+    @Override
+    public void configure(Context context) {
+        // NO-OP...
+    }
 
-	@Override
-	public void configure(ComponentConfiguration conf) {
-		// NO-OP...
-	}
+    @Override
+    public void configure(ComponentConfiguration conf) {
+        // NO-OP...
+    }
 
-	@Override
-	public XContentBuilder getContentBuilder(Event event) throws IOException {
-		XContentBuilder builder = jsonBuilder().startObject();
-		appendBody(builder, event);
-		appendHeaders(builder, event);
-		return builder;
-	}
+    @Override
+    public XContentBuilder getContentBuilder(Event event) throws IOException {
+        XContentBuilder builder = jsonBuilder().startObject();
+        appendBody(builder, event);
+        appendHeaders(builder, event);
+        return builder;
+    }
 
-	private void appendBody(XContentBuilder builder, Event event) throws IOException {
-		// ContentBuilderUtil.appendField(builder, "body", event.getBody());
-		ContentBuilderUtil.appendField(builder, "message", event.getBody());
-	}
+    private void appendBody(XContentBuilder builder, Event event) throws IOException {
+        // ContentBuilderUtil.appendField(builder, "body", event.getBody());
+        ContentBuilderUtil.appendField(builder, "message", event.getBody());
+    }
 
-	private void appendHeaders(XContentBuilder builder, Event event) throws IOException {
-		Map<String, String> headers = event.getHeaders();
-		for (Map.Entry<String, String> entry : headers.entrySet()) {
+    private void appendHeaders(XContentBuilder builder, Event event) throws IOException {
+        Map<String, String> headers = event.getHeaders();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
 
-			if ("timestamp".equals(entry.getKey())) {
-				long timestampMs = Long.parseLong(entry.getValue());
-				builder.field("@timestamp", new Date(timestampMs));
-			} else {
-				ContentBuilderUtil.appendField(builder, entry.getKey(), entry.getValue().getBytes(charset));
-			}
+            if ("timestamp".equals(entry.getKey())) {
+                long timestampMs = Long.parseLong(entry.getValue());
+                builder.field("@timestamp", new Date(timestampMs));
+            } else if ("cost".equals(entry.getKey())) { //花费时间
+                builder.field("cost", Long.valueOf(entry.getValue()));
+            } else {
+                ContentBuilderUtil.appendField(builder, entry.getKey(), entry.getValue().getBytes(charset));
+            }
 
-			// ContentBuilderUtil.appendField(builder, entry.getKey(),
-			// entry.getValue().getBytes(charset));
-		}
-	}
+            // ContentBuilderUtil.appendField(builder, entry.getKey(),
+            // entry.getValue().getBytes(charset));
+        }
+    }
 
 }
