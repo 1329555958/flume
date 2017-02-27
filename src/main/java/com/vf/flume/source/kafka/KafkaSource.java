@@ -179,7 +179,7 @@ public class KafkaSource extends AbstractSource
                         if ("tomcataccess".equals(type) || "tomcat".equals(type)) {
                             String appName = headers.get("appName");
                             String filePath = headers.get("filePath");
-                            headers.put("filePath", "/tomcat/" + appName + "/logs/" + filePath);
+                            headers.put("filePath", "/opt/app/" + appName + "/logs/" + filePath);
                         }
                         //极端情况
                         if (!headers.containsKey("filePath")) {
@@ -188,7 +188,7 @@ public class KafkaSource extends AbstractSource
                                 headers.put("envInfo", "temp");
                                 headers.put("filePath", "test");
                             } else {
-                                headers.put("filePath", "/tomcat/" + appName + "/logs/temp");
+                                headers.put("filePath", "/opt/app/" + appName + "/logs/temp");
                             }
                         }
                     }
