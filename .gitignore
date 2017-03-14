@@ -11,3 +11,4 @@ finlog-flume1.6.0.iml
 .settings/
 /bin/
 node_modules
+target
